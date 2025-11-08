@@ -21,6 +21,7 @@ export default function Header() {
   }, [isOpen]);
 
   useEffect(() => {
+    if (!isOpen) return;
     const handleClickOutside = (event: MouseEvent) => {
       if (
         sidebarRef.current &&
@@ -31,10 +32,7 @@ export default function Header() {
       }
     };
 
-    // Only add listener when sidebar is open
-    if (isOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
+    document.addEventListener("mousedown", handleClickOutside);
 
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
