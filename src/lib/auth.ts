@@ -13,5 +13,8 @@ export const auth = betterAuth({
   database: drizzleAdapter(db, {
     provider: "pg",
   }),
+  session: {
+    expiresIn: 60 * 60 * 12,
+  },
   plugins: [reactStartCookies()],
 });

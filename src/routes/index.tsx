@@ -7,45 +7,10 @@ import { createAuthClient } from "better-auth/react";
 
 export const Route = createFileRoute("/")({
   component: HomePage,
-  loader: async () => {
-    const session = await getSessionFromServer();
-    return { session };
-  },
 });
-const authClient = createAuthClient();
-
-const getSessionFromServer = createServerFn({ method: "GET" }).handler(
-  async () => {
-    const request = getRequestHeaders();
-    const session = await auth.api.getSession({
-      headers: request,
-    });
-    return session;
-  }
-);
 
 function HomePage() {
   // const authClient =
-  const { session } = Route.useLoaderData();
-  const router = useRouter();
-
-  const handleSignUp = async () => {
-    console.log("Sign Up clicked");
-    await authClient.signIn.social({
-      provider: "google",
-      errorCallbackURL: "/",
-    });
-  };
-
-  const handleLogOut = async () => {
-    await authClient.signOut({
-      fetchOptions: {
-        onSuccess: () => {
-          router.invalidate();
-        },
-      },
-    });
-  };
 
   // const { data: session } = authClient.useSession();
 
@@ -77,19 +42,6 @@ function HomePage() {
               </p>
             </div>
           </div>
-
-          {session ? (
-            <>
-              <p>Welcome {session.user.name || session.user.email}</p>
-              <div>
-                <Button onClick={handleLogOut}>Log Out</Button>
-              </div>
-            </>
-          ) : (
-            <div>
-              <Button onClick={handleSignUp}>Sign Up</Button>
-            </div>
-          )}
         </section>
       </main>
     </div>
