@@ -15,6 +15,13 @@
       "when": 1762603355751,
       "tag": "0001_stormy_madelyne_pryor",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1762696202964,
+      "tag": "0002_pink_bill_hollister",
+      "breakpoints": true
     }
   ]
 }
