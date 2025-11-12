@@ -2,8 +2,15 @@ import { Link } from "@tanstack/react-router";
 
 import { useEffect, useRef, useState } from "react";
 import { Construction, Home, Menu, X } from "lucide-react";
+import { Button } from "./ui/button";
+import { Session } from "@/lib/server-functions";
 
-export default function Header() {
+type Props = {
+  session: Session;
+  isAdmin?: boolean;
+};
+
+export default function Header({ session, isAdmin }: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const sidebarRef = useRef<HTMLElement>(null);
 
@@ -41,22 +48,27 @@ export default function Header() {
 
   return (
     <>
-      <header className="p-4 flex items-center bg-sidebar border-b border-sidebar-border shadow-lg backdrop-blur-sm sticky top-0 z-40">
-        <button
-          onClick={() => setIsOpen(true)}
-          className="p-2 hover:bg-sidebar-accent rounded-lg transition-colors text-sidebar-foreground"
-          aria-label="Open menu"
-        >
-          <Menu size={24} />
-        </button>
-        <h1 className="ml-4 text-xl font-semibold text-white">
-          <Link
-            to="/"
-            className="text-white hover:text-primary transition-colors"
+      <header className="p-4 flex items-center justify-between bg-sidebar border-b border-sidebar-border shadow-lg backdrop-blur-sm sticky top-0 z-40">
+        <div className="flex items-center">
+          <button
+            onClick={() => setIsOpen(true)}
+            className="p-2 hover:bg-sidebar-accent rounded-lg transition-colors text-sidebar-foreground"
+            aria-label="Open menu"
           >
-            zee0x1
-          </Link>
-        </h1>
+            <Menu size={24} />
+          </button>
+          <h1 className="ml-4 text-xl font-semibold text-white">
+            <Link
+              to="/"
+              className="text-white hover:text-primary transition-colors"
+            >
+              zee0x1
+            </Link>
+          </h1>
+        </div>
+        <div>
+          <Button>Log Out</Button>
+        </div>
       </header>
 
       <aside
@@ -66,7 +78,7 @@ export default function Header() {
         ref={sidebarRef}
       >
         <div className="flex items-center justify-between p-4 border-b border-sidebar-border">
-          <h2 className="text-xl font-bold text-white">Navigation</h2>
+          <h2 className="text-xl font-bold text-white">Where to?</h2>
           <button
             onClick={() => setIsOpen(false)}
             className="p-2 hover:bg-sidebar-accent rounded-lg transition-colors text-sidebar-foreground"

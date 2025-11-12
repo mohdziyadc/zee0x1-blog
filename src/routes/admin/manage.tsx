@@ -1,12 +1,8 @@
 import { Button } from "@/components/ui/button";
-import { db } from "@/db";
-import { user } from "@/db/schema";
-import { auth } from "@/lib/auth";
+import { getSessionAndAdminFromServer } from "@/lib/server-functions";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
-import { createServerFn } from "@tanstack/react-start";
-import { getRequestHeaders } from "@tanstack/react-start/server";
+
 import { createAuthClient } from "better-auth/react";
-import { eq } from "drizzle-orm";
 
 export const Route = createFileRoute("/admin/manage")({
   component: RouteComponent,
@@ -18,31 +14,6 @@ export const Route = createFileRoute("/admin/manage")({
 });
 
 const authClient = createAuthClient();
-
-const getSessionAndAdminFromServer = createServerFn({ method: "GET" }).handler(
-  async () => {
-    const reqHeaders = getRequestHeaders();
-    const session = await auth.api.getSession({
-      headers: reqHeaders,
-    });
-
-    if (!session?.user.email) {
-      return { session: null, isAdmin: false };
-    }
-
-    const result = await db
-      .select({
-        isAdmin: user.isAdmin,
-      })
-      .from(user)
-      .where(eq(user.email, session.user.email));
-
-    return {
-      session,
-      isAdmin: result[0].isAdmin,
-    };
-  }
-);
 
 function RouteComponent() {
   const { session, isAdmin } = Route.useLoaderData();
