@@ -10,8 +10,10 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ProjectsRouteImport } from './routes/projects'
+import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AdminManageRouteImport } from './routes/admin/manage'
+import { Route as AdminViewRouteImport } from './routes/admin/view'
+import { Route as AdminCreateRouteImport } from './routes/admin/create'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
 const ProjectsRoute = ProjectsRouteImport.update({
@@ -19,15 +21,25 @@ const ProjectsRoute = ProjectsRouteImport.update({
   path: '/projects',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRouteRoute = AdminRouteRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminManageRoute = AdminManageRouteImport.update({
-  id: '/admin/manage',
-  path: '/admin/manage',
-  getParentRoute: () => rootRouteImport,
+const AdminViewRoute = AdminViewRouteImport.update({
+  id: '/view',
+  path: '/view',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminCreateRoute = AdminCreateRouteImport.update({
+  id: '/create',
+  path: '/create',
+  getParentRoute: () => AdminRouteRoute,
 } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
@@ -37,35 +49,60 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteRouteWithChildren
   '/projects': typeof ProjectsRoute
-  '/admin/manage': typeof AdminManageRoute
+  '/admin/create': typeof AdminCreateRoute
+  '/admin/view': typeof AdminViewRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteRouteWithChildren
   '/projects': typeof ProjectsRoute
-  '/admin/manage': typeof AdminManageRoute
+  '/admin/create': typeof AdminCreateRoute
+  '/admin/view': typeof AdminViewRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteRouteWithChildren
   '/projects': typeof ProjectsRoute
-  '/admin/manage': typeof AdminManageRoute
+  '/admin/create': typeof AdminCreateRoute
+  '/admin/view': typeof AdminViewRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/projects' | '/admin/manage' | '/api/auth/$'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/projects'
+    | '/admin/create'
+    | '/admin/view'
+    | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/projects' | '/admin/manage' | '/api/auth/$'
-  id: '__root__' | '/' | '/projects' | '/admin/manage' | '/api/auth/$'
+  to:
+    | '/'
+    | '/admin'
+    | '/projects'
+    | '/admin/create'
+    | '/admin/view'
+    | '/api/auth/$'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/projects'
+    | '/admin/create'
+    | '/admin/view'
+    | '/api/auth/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRouteRoute: typeof AdminRouteRouteWithChildren
   ProjectsRoute: typeof ProjectsRoute
-  AdminManageRoute: typeof AdminManageRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
@@ -78,6 +115,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProjectsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -85,12 +129,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/manage': {
-      id: '/admin/manage'
-      path: '/admin/manage'
-      fullPath: '/admin/manage'
-      preLoaderRoute: typeof AdminManageRouteImport
-      parentRoute: typeof rootRouteImport
+    '/admin/view': {
+      id: '/admin/view'
+      path: '/view'
+      fullPath: '/admin/view'
+      preLoaderRoute: typeof AdminViewRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/create': {
+      id: '/admin/create'
+      path: '/create'
+      fullPath: '/admin/create'
+      preLoaderRoute: typeof AdminCreateRouteImport
+      parentRoute: typeof AdminRouteRoute
     }
     '/api/auth/$': {
       id: '/api/auth/$'
@@ -102,10 +153,24 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AdminRouteRouteChildren {
+  AdminCreateRoute: typeof AdminCreateRoute
+  AdminViewRoute: typeof AdminViewRoute
+}
+
+const AdminRouteRouteChildren: AdminRouteRouteChildren = {
+  AdminCreateRoute: AdminCreateRoute,
+  AdminViewRoute: AdminViewRoute,
+}
+
+const AdminRouteRouteWithChildren = AdminRouteRoute._addFileChildren(
+  AdminRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRouteRoute: AdminRouteRouteWithChildren,
   ProjectsRoute: ProjectsRoute,
-  AdminManageRoute: AdminManageRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport
