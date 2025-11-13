@@ -1,6 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { getSessionAndAdminFromServer } from "@/lib/server-functions";
-import { createFileRoute, Link, Outlet, useRouter } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  Link,
+  Outlet,
+  useRouter,
+} from "@tanstack/react-router";
 
 import { createAuthClient } from "better-auth/react";
 
@@ -81,12 +86,14 @@ function AdminLayout() {
   return (
     <div className="flex min-h-[calc(100vh-4.5rem)]">
       <aside className="w-64 border-r p-4">
-        <h2 className="text-xl font-bold">Admin Panel</h2>
+        <h2 className="text-xl font-bold">
+          <Link to="/admin">Admin Panel</Link>
+        </h2>
         <nav className="my-4">
-          <Link to = '/admin/view'>View & Publish</Link>
+          <Link to="/admin/view">View & Publish</Link>
         </nav>
         <nav className="my-4">
-          <Link to = '/admin/create'>Create</Link>
+          <Link to="/admin/create">Create</Link>
         </nav>
       </aside>
       <main className="flex-1 p-4">
