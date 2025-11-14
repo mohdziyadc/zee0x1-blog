@@ -1,9 +1,9 @@
 import { LexicalComposer } from "@lexical/react/LexicalComposer";
-import { PlainTextPlugin } from "@lexical/react/LexicalPlainTextPlugin";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
 import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary";
 import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
 import {
+  $createTextNode,
   $getRoot,
   $getSelection,
   $isRangeSelection,
@@ -12,9 +12,26 @@ import {
 } from "lexical";
 import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
 import { Button } from "./ui/button";
-import { removeList } from "@lexical/list";
+import {
+  INSERT_ORDERED_LIST_COMMAND,
+  INSERT_UNORDERED_LIST_COMMAND,
+  ListItemNode,
+  ListNode,
+  REMOVE_LIST_COMMAND,
+  removeList,
+} from "@lexical/list";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
+import {
+  $createHeadingNode,
+  HeadingNode,
+  HeadingTagType,
+} from "@lexical/rich-text";
+import { ListPlugin } from "@lexical/react/LexicalListPlugin";
+import { Image, Link } from "lucide-react";
+import { LinkPlugin } from "@lexical/react/LexicalLinkPlugin";
+import { $createLinkNode, LinkNode } from "@lexical/link";
 
 const editorConfig = {
   namespace: "zee0x1 Editor",
@@ -47,6 +64,10 @@ const editorConfig = {
   },
   nodes: [
     //TODO - Image Node
+    HeadingNode,
+    ListNode,
+    ListItemNode,
+    LinkNode,
   ],
 };
 
@@ -62,9 +83,6 @@ const onChange = (editorState: EditorState) => {
 const ToolbarPlugin = () => {
   //editor instance with context
   const [editor] = useLexicalComposerContext();
-  // const [isBold, setIsBold] = useState(false)
-  // const [isItalic, setIsItalic] = useState(false)
-  // const [isUnderline, setIsUnderline] = useState(false)
   const [toolbarState, setToolbarState] = useState({
     isBold: false,
     isItalic: false,
@@ -95,32 +113,34 @@ const ToolbarPlugin = () => {
     editor.dispatchCommand(FORMAT_TEXT_COMMAND, "bold");
   }
 
-  function formatItalic(
-    event: MouseEvent<HTMLButtonElement, MouseEvent>
-  ): void {
-    throw new Error("Function not implemented.");
+  function formatItalic() {
+    editor.dispatchCommand(FORMAT_TEXT_COMMAND, "italic");
   }
 
-  function formatUnderline(
-    event: MouseEvent<HTMLButtonElement, MouseEvent>
-  ): void {
-    throw new Error("Function not implemented.");
+  function formatUnderline() {
+    editor.dispatchCommand(FORMAT_TEXT_COMMAND, "underline");
   }
 
-  function formatHeading(arg0: string): void {
-    throw new Error("Function not implemented.");
+  function formatHeading(sizeTag: HeadingTagType) {
+    editor.update(() => {
+      const selection = $getSelection();
+      if ($isRangeSelection(selection)) {
+        const headingNode = $createHeadingNode(sizeTag);
+        selection.insertNodes([headingNode]);
+      }
+    });
   }
 
-  function formatBulletList(
-    event: MouseEvent<HTMLButtonElement, MouseEvent>
-  ): void {
-    throw new Error("Function not implemented.");
+  function formatBulletList() {
+    editor.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND, undefined);
   }
 
-  function formatNumberedList(
-    event: MouseEvent<HTMLButtonElement, MouseEvent>
-  ): void {
-    throw new Error("Function not implemented.");
+  function formatNumberedList() {
+    editor.dispatchCommand(INSERT_ORDERED_LIST_COMMAND, undefined);
+  }
+
+  function removeList() {
+    editor.dispatchCommand(REMOVE_LIST_COMMAND, undefined);
   }
 
   function handleImageUpload(
@@ -129,8 +149,36 @@ const ToolbarPlugin = () => {
     throw new Error("Function not implemented.");
   }
 
+  function handleUrlFormat() {
+    editor.update(() => {
+      const selection = $getSelection();
+      if ($isRangeSelection(selection)) {
+        const selectedText = selection.getTextContent();
+        if (selectedText) {
+          const url =
+            selectedText.startsWith("http://") ||
+            selectedText.startsWith("https://")
+              ? selectedText
+              : `https://${selectedText}`;
+
+          const linkNode = $createLinkNode(url);
+          const textNode = $createTextNode(selectedText);
+
+          linkNode.append(textNode);
+
+          selection.insertNodes([linkNode]);
+          linkNode.selectNext();
+        }
+        //No else conditon for now
+      }
+    });
+  }
+
   return (
-    <div className="flex rounded-lg flex-wrap gap-2 p-2 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+    <div
+      className="flex rounded-lg flex-wrap gap-2 p-2 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 
+    **:data-[slot='button']:transition-all **:data-[slot='button']:duration-100 **:data-[slot='button']:hover:bg-accent-foreground/20! **:data-[slot='button']:hover:backdrop-blur-sm **:data-[slot='button']:hover:scale-[1.02]"
+    >
       {/* Text Formatting Buttons */}
       <Button
         type="button"
@@ -170,7 +218,7 @@ const ToolbarPlugin = () => {
         onClick={() => formatHeading("h1")}
         aria-label="Heading 1"
       >
-        H1
+        h1
       </Button>
       <Button
         type="button"
@@ -179,7 +227,7 @@ const ToolbarPlugin = () => {
         onClick={() => formatHeading("h2")}
         aria-label="Heading 2"
       >
-        H2
+        h2
       </Button>
       <Button
         type="button"
@@ -188,7 +236,7 @@ const ToolbarPlugin = () => {
         onClick={() => formatHeading("h3")}
         aria-label="Heading 3"
       >
-        H3
+        h3
       </Button>
 
       <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1" />
@@ -232,7 +280,17 @@ const ToolbarPlugin = () => {
         onClick={handleImageUpload}
         aria-label="Upload Image"
       >
-        📷 Image
+        <Image />
+      </Button>
+
+      <Button
+        type="button"
+        variant={"outline"}
+        size={"sm"}
+        onClick={handleUrlFormat}
+        aria-label="url"
+      >
+        <Link />
       </Button>
     </div>
   );
@@ -247,7 +305,7 @@ export const LexicalEditor = () => {
       <div className="border-2 border-white rounded-lg mb-2">
         <ToolbarPlugin />
       </div>
-      <PlainTextPlugin
+      <RichTextPlugin
         contentEditable={
           <ContentEditable
             aria-placeholder={"Enter some text..."}
@@ -259,6 +317,8 @@ export const LexicalEditor = () => {
       />
       <OnChangePlugin onChange={onChange} />
       <HistoryPlugin />
+      <ListPlugin />
+      <LinkPlugin />
     </LexicalComposer>
   );
 };
