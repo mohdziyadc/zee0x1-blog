@@ -1,18 +1,32 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useRouter } from "@tanstack/react-router";
 
 import { useEffect, useRef, useState } from "react";
 import { Construction, Home, Menu, X } from "lucide-react";
 import { Button } from "./ui/button";
 import { Session } from "@/lib/server-functions";
+import { createAuthClient } from "better-auth/react";
 
 type Props = {
   session: Session;
   isAdmin?: boolean;
 };
 
+const authClient = createAuthClient();
+
 export default function Header({ session, isAdmin }: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const sidebarRef = useRef<HTMLElement>(null);
+  const router = useRouter();
+
+  const handleLogOut = async () => {
+    await authClient.signOut({
+      fetchOptions: {
+        onSuccess: () => {
+          router.invalidate();
+        },
+      },
+    });
+  };
 
   useEffect(() => {
     if (!isOpen) return;
@@ -66,9 +80,21 @@ export default function Header({ session, isAdmin }: Props) {
             </Link>
           </h1>
         </div>
-        <div>
-          <Button>Log Out</Button>
-        </div>
+        {session && (
+          <div className="flex gap-4 items-center">
+            {isAdmin && (
+              <div>
+                <img
+                  className="rounded-[9999px]"
+                  src={session.user.image || ""}
+                  width={36}
+                  height={36}
+                />
+              </div>
+            )}
+            <Button onClick={handleLogOut}>Log Out</Button>
+          </div>
+        )}
       </header>
 
       <aside
