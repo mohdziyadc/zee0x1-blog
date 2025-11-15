@@ -18,20 +18,23 @@ import {
   ListItemNode,
   ListNode,
   REMOVE_LIST_COMMAND,
-  removeList,
 } from "@lexical/list";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { useCallback, useEffect, useState } from "react";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import {
   $createHeadingNode,
+  $createQuoteNode,
   HeadingNode,
   HeadingTagType,
+  QuoteNode,
 } from "@lexical/rich-text";
 import { ListPlugin } from "@lexical/react/LexicalListPlugin";
-import { Image, Link } from "lucide-react";
+import { Image, Link, Megaphone } from "lucide-react";
 import { LinkPlugin } from "@lexical/react/LexicalLinkPlugin";
 import { $createLinkNode, LinkNode } from "@lexical/link";
+import { $setBlocksType } from "@lexical/selection";
+import { $generateHtmlFromNodes } from "@lexical/html";
 
 const editorConfig = {
   namespace: "zee0x1 Editor",
@@ -57,7 +60,7 @@ const editorConfig = {
     },
     link: "text-blue-600 dark:text-blue-400 underline",
     paragraph: "mb-2",
-    qoute: "border-l-4 border-gray-300 dark:border-gray-600 pl-4 italic",
+    quote: "border-l-4 border-gray-300 dark:border-gray-600 pl-4 italic",
   },
   onError: (error: Error) => {
     console.error("Lexical Editor Error: ", error);
@@ -68,16 +71,43 @@ const editorConfig = {
     ListNode,
     ListItemNode,
     LinkNode,
+    QuoteNode,
   ],
 };
 
-const onChange = (editorState: EditorState) => {
-  editorState.read(() => {
-    const root = $getRoot();
-    const selection = $getSelection();
+type LexicalEditorProps = {
+  onChange?: (html: string) => void;
+};
 
-    console.log(root, selection);
-  });
+// const onChange = (editorState: EditorState) => {
+//   editorState.read(() => {
+//     const root = $getRoot();
+//     const selection = $getSelection();
+
+//     console.log(root, selection);
+//   });
+// };
+
+const OnChangePluginWrapper = ({
+  onChange,
+}: {
+  onChange?: (html: string) => void;
+}) => {
+  const [editor] = useLexicalComposerContext();
+
+  const handleChange = useCallback(
+    (editorState: EditorState) => {
+      editorState.read(() => {
+        const htmlString = $generateHtmlFromNodes(editor, null);
+
+        if (onChange) {
+          onChange(htmlString);
+        }
+      });
+    },
+    [editor, onChange]
+  );
+  return <OnChangePlugin onChange={handleChange} />;
 };
 
 const ToolbarPlugin = () => {
@@ -143,11 +173,12 @@ const ToolbarPlugin = () => {
     editor.dispatchCommand(REMOVE_LIST_COMMAND, undefined);
   }
 
-  function handleImageUpload(
-    event: MouseEvent<HTMLButtonElement, MouseEvent>
-  ): void {
-    throw new Error("Function not implemented.");
-  }
+  // TODO
+  // function handleImageUpload(
+  //   event: MouseEvent<HTMLButtonElement, MouseEvent>
+  // ): void {
+  //   throw new Error("Function not implemented.");
+  // }
 
   function handleUrlFormat() {
     editor.update(() => {
@@ -174,9 +205,18 @@ const ToolbarPlugin = () => {
     });
   }
 
+  const formatQuote = () => {
+    editor.update(() => {
+      const selection = $getSelection();
+      if ($isRangeSelection(selection)) {
+        $setBlocksType(selection, () => $createQuoteNode());
+      }
+    });
+  };
+
   return (
     <div
-      className="flex rounded-lg flex-wrap gap-2 p-2 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 
+      className="flex w-fit border-2 rounded-lg flex-wrap gap-2 p-2 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 
     **:data-[slot='button']:transition-all **:data-[slot='button']:duration-100 **:data-[slot='button']:hover:bg-accent-foreground/20! **:data-[slot='button']:hover:backdrop-blur-sm **:data-[slot='button']:hover:scale-[1.02]"
     >
       {/* Text Formatting Buttons */}
@@ -277,7 +317,7 @@ const ToolbarPlugin = () => {
         type="button"
         variant="outline"
         size="sm"
-        onClick={handleImageUpload}
+        onClick={() => console.log("TODO!!")}
         aria-label="Upload Image"
       >
         <Image />
@@ -292,17 +332,28 @@ const ToolbarPlugin = () => {
       >
         <Link />
       </Button>
+
+      <Button
+        type="button"
+        variant={"outline"}
+        size={"sm"}
+        onClick={formatQuote}
+        aria-label="url"
+      >
+        <Megaphone />
+      </Button>
     </div>
   );
 };
 
-export const LexicalEditor = () => {
+export const LexicalEditor = ({ onChange }: LexicalEditorProps) => {
   const initialConfig = {
     ...editorConfig,
   };
+
   return (
     <LexicalComposer initialConfig={initialConfig}>
-      <div className="border-2 border-white rounded-lg mb-2">
+      <div className="mb-2">
         <ToolbarPlugin />
       </div>
       <RichTextPlugin
@@ -315,7 +366,7 @@ export const LexicalEditor = () => {
         }
         ErrorBoundary={LexicalErrorBoundary}
       />
-      <OnChangePlugin onChange={onChange} />
+      <OnChangePluginWrapper onChange={onChange} />
       <HistoryPlugin />
       <ListPlugin />
       <LinkPlugin />

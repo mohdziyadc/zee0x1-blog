@@ -58,7 +58,7 @@ function RootDocument() {
       <body className="min-h-screen">
         <Header session={session} isAdmin={isAdmin} />
         <Outlet />
-        <TanStackDevtools
+        {/* <TanStackDevtools
           config={{
             position: "bottom-right",
           }}
@@ -69,7 +69,7 @@ function RootDocument() {
             },
             TanStackQueryDevtools,
           ]}
-        />
+        /> */}
         <Scripts />
       </body>
     </html>
