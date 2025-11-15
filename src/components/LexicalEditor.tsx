@@ -4,7 +4,6 @@ import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary";
 import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
 import {
   $createTextNode,
-  $getRoot,
   $getSelection,
   $isRangeSelection,
   EditorState,
@@ -20,7 +19,7 @@ import {
   REMOVE_LIST_COMMAND,
 } from "@lexical/list";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import {
   $createHeadingNode,
@@ -78,15 +77,6 @@ const editorConfig = {
 type LexicalEditorProps = {
   onChange?: (html: string) => void;
 };
-
-// const onChange = (editorState: EditorState) => {
-//   editorState.read(() => {
-//     const root = $getRoot();
-//     const selection = $getSelection();
-
-//     console.log(root, selection);
-//   });
-// };
 
 const OnChangePluginWrapper = ({
   onChange,
