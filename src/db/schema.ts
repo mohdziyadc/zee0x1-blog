@@ -1,7 +1,6 @@
 import {
   boolean,
   index,
-  integer,
   pgTable,
   serial,
   text,
@@ -66,5 +65,21 @@ export const verification = pgTable("verification", {
   updatedAt: timestamp("updated_at")
     .defaultNow()
     .$onUpdate(() => /* @__PURE__ */ new Date())
+    .notNull(),
+});
+
+export const blogs = pgTable("blogs", {
+  id: serial("id").primaryKey(),
+  slug: text("slug").unique(),
+  title: text("title").notNull(),
+  content: text("content"),
+  excerpt: text("excerpt"), // Short preview text for listings
+  status: text("status").default("DRAFT").notNull(), // 'DRAFT' | 'PUBLISHED' | 'INACTIVE'
+  author_id: text("author_id").notNull(),
+  publishedAt: timestamp("published_at"), // When the blog was published
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at")
+    .defaultNow()
+    .$onUpdate(() => new Date())
     .notNull(),
 });
