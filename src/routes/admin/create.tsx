@@ -26,7 +26,7 @@ function RouteComponent() {
     from: "/admin",
   });
 
-  const createDraftBlog = useServerFn(createDraftBlogPost);
+  // const createDraftBlog = useServerFn(createDraftBlogPost);
 
   const extractSlug = (text: string) => {
     return text
@@ -40,7 +40,7 @@ function RouteComponent() {
 
   const mutation = useMutation({
     mutationFn: async (data: BlogsSchemaType) => {
-      await createDraftBlog({
+      await createDraftBlogPost({
         data: {
           slug: data.slug,
           title: data.title,
