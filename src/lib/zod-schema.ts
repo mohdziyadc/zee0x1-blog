@@ -8,3 +8,7 @@ export const BlogsSchema = z.object({
   status: z.string().default("DRAFT"),
   author_id: z.string().min(1),
 });
+
+export const FetchBlogDto = z.object({
+  blogStatus: z.string().optional().default("DRAFT"),
+});
