@@ -16,6 +16,7 @@ import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AdminViewRouteImport } from './routes/admin/view'
 import { Route as AdminCreateRouteImport } from './routes/admin/create'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as AdminEditSlugRouteImport } from './routes/admin/edit/$slug'
 
 const ProjectsRoute = ProjectsRouteImport.update({
   id: '/projects',
@@ -52,6 +53,11 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminEditSlugRoute = AdminEditSlugRouteImport.update({
+  id: '/edit/$slug',
+  path: '/edit/$slug',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -60,6 +66,7 @@ export interface FileRoutesByFullPath {
   '/admin/create': typeof AdminCreateRoute
   '/admin/view': typeof AdminViewRoute
   '/admin/': typeof AdminIndexRoute
+  '/admin/edit/$slug': typeof AdminEditSlugRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesByTo {
@@ -68,6 +75,7 @@ export interface FileRoutesByTo {
   '/admin/create': typeof AdminCreateRoute
   '/admin/view': typeof AdminViewRoute
   '/admin': typeof AdminIndexRoute
+  '/admin/edit/$slug': typeof AdminEditSlugRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesById {
@@ -78,6 +86,7 @@ export interface FileRoutesById {
   '/admin/create': typeof AdminCreateRoute
   '/admin/view': typeof AdminViewRoute
   '/admin/': typeof AdminIndexRoute
+  '/admin/edit/$slug': typeof AdminEditSlugRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRouteTypes {
@@ -89,6 +98,7 @@ export interface FileRouteTypes {
     | '/admin/create'
     | '/admin/view'
     | '/admin/'
+    | '/admin/edit/$slug'
     | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -97,6 +107,7 @@ export interface FileRouteTypes {
     | '/admin/create'
     | '/admin/view'
     | '/admin'
+    | '/admin/edit/$slug'
     | '/api/auth/$'
   id:
     | '__root__'
@@ -106,6 +117,7 @@ export interface FileRouteTypes {
     | '/admin/create'
     | '/admin/view'
     | '/admin/'
+    | '/admin/edit/$slug'
     | '/api/auth/$'
   fileRoutesById: FileRoutesById
 }
@@ -167,6 +179,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/edit/$slug': {
+      id: '/admin/edit/$slug'
+      path: '/edit/$slug'
+      fullPath: '/admin/edit/$slug'
+      preLoaderRoute: typeof AdminEditSlugRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
   }
 }
 
@@ -174,12 +193,14 @@ interface AdminRouteRouteChildren {
   AdminCreateRoute: typeof AdminCreateRoute
   AdminViewRoute: typeof AdminViewRoute
   AdminIndexRoute: typeof AdminIndexRoute
+  AdminEditSlugRoute: typeof AdminEditSlugRoute
 }
 
 const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminCreateRoute: AdminCreateRoute,
   AdminViewRoute: AdminViewRoute,
   AdminIndexRoute: AdminIndexRoute,
+  AdminEditSlugRoute: AdminEditSlugRoute,
 }
 
 const AdminRouteRouteWithChildren = AdminRouteRoute._addFileChildren(

@@ -6,6 +6,7 @@ import {
   $createTextNode,
   $getSelection,
   $isRangeSelection,
+  $getRoot,
   EditorState,
   FORMAT_TEXT_COMMAND,
 } from "lexical";
@@ -19,7 +20,7 @@ import {
   REMOVE_LIST_COMMAND,
 } from "@lexical/list";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import {
   $createHeadingNode,
@@ -33,7 +34,7 @@ import { Image, Link, Megaphone } from "lucide-react";
 import { LinkPlugin } from "@lexical/react/LexicalLinkPlugin";
 import { $createLinkNode, LinkNode } from "@lexical/link";
 import { $setBlocksType } from "@lexical/selection";
-import { $generateHtmlFromNodes } from "@lexical/html";
+import { $generateHtmlFromNodes, $generateNodesFromDOM } from "@lexical/html";
 
 const editorConfig = {
   namespace: "zee0x1 Editor",
@@ -76,6 +77,7 @@ const editorConfig = {
 
 type LexicalEditorProps = {
   onChange?: (html: string) => void;
+  initialContent?: string;
 };
 
 const OnChangePluginWrapper = ({
@@ -98,6 +100,32 @@ const OnChangePluginWrapper = ({
     [editor, onChange]
   );
   return <OnChangePlugin onChange={handleChange} />;
+};
+
+const InitialContentPlugin = ({
+  initialContent,
+}: {
+  initialContent?: string;
+}) => {
+  const [editor] = useLexicalComposerContext();
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  useEffect(() => {
+    if (!initialContent || isInitialized) return;
+
+    editor.update(() => {
+      const parser = new DOMParser();
+      const dom = parser.parseFromString(initialContent, "text/html");
+      const nodes = $generateNodesFromDOM(editor, dom);
+      const root = $getRoot();
+      root.clear();
+      root.append(...nodes);
+    });
+
+    setIsInitialized(true);
+  }, [editor, initialContent, isInitialized]);
+
+  return null;
 };
 
 const ToolbarPlugin = () => {
@@ -336,7 +364,10 @@ const ToolbarPlugin = () => {
   );
 };
 
-export const LexicalEditor = ({ onChange }: LexicalEditorProps) => {
+export const LexicalEditor = ({
+  onChange,
+  initialContent,
+}: LexicalEditorProps) => {
   const initialConfig = {
     ...editorConfig,
   };
@@ -351,12 +382,13 @@ export const LexicalEditor = ({ onChange }: LexicalEditorProps) => {
           <ContentEditable
             aria-placeholder={"Enter some text..."}
             placeholder={<div></div>}
-            className="border-gray-400 rounded-md border-2 min-h-[500px] p-4"
+            className="border-gray-400 rounded-md text-lg border-2 min-h-[300px] max-h-[600px] overflow-y-auto p-4"
           />
         }
         ErrorBoundary={LexicalErrorBoundary}
       />
       <OnChangePluginWrapper onChange={onChange} />
+      <InitialContentPlugin initialContent={initialContent} />
       <HistoryPlugin />
       <ListPlugin />
       <LinkPlugin />

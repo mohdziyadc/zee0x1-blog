@@ -96,7 +96,7 @@ function AdminLayout() {
           <Link to="/admin/create">Create</Link>
         </nav>
       </aside>
-      <main className="flex-1 p-4">
+      <main className="flex-1 p-4 overflow-hidden">
         <Outlet />
       </main>
     </div>

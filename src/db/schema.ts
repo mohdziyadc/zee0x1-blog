@@ -76,9 +76,11 @@ export const blogs = pgTable("blogs", {
   excerpt: text("excerpt"), // Short preview text for listings
   status: text("status").default("DRAFT").notNull(), // 'DRAFT' | 'PUBLISHED' | 'INACTIVE'
   author_id: text("author_id").notNull(),
-  publishedAt: timestamp("published_at"), // When the blog was published
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at")
+  publishedAt: timestamp("published_at", { withTimezone: true }), // When the blog was published
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
     .defaultNow()
     .$onUpdate(() => new Date())
     .notNull(),

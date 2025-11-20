@@ -1,14 +1,9 @@
-import { LexicalEditor } from "@/components/LexicalEditor";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { BlogForm } from "@/components/BlogForm";
 import { createDraftBlogPost } from "@/lib/server-functions";
 import { generateExcerpt } from "@/lib/utils";
 import { createFileRoute, useLoaderData } from "@tanstack/react-router";
-import { useServerFn } from "@tanstack/react-start";
 import { useMutation } from "@tanstack/react-query";
-import { useState } from "react";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
 import { BlogsSchema } from "@/lib/zod-schema";
 import { z } from "zod";
 
@@ -19,14 +14,9 @@ export const Route = createFileRoute("/admin/create")({
 type BlogsSchemaType = z.infer<typeof BlogsSchema>;
 
 function RouteComponent() {
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
-
   const { session, isAdmin } = useLoaderData({
     from: "/admin",
   });
-
-  // const createDraftBlog = useServerFn(createDraftBlogPost);
 
   const extractSlug = (text: string) => {
     return text
@@ -59,7 +49,7 @@ function RouteComponent() {
     },
   });
 
-  const addBlogHandler = () => {
+  const handleSubmit = (title: string, content: string) => {
     if (!isAdmin || !session?.user) {
       toast.error("Error in authentication");
       return;
@@ -81,37 +71,11 @@ function RouteComponent() {
   return (
     <div>
       <h2 className="text-xl font-bold">Write ahead</h2>
-      <main className="flex flex-col gap-6 mt-8">
-        <div>
-          <div className="text-xl mb-2 font-bold">Title</div>
-          <Input
-            value={title}
-            placeholder="Enter blog title"
-            onChange={(e) => {
-              setTitle(e.target.value);
-            }}
-            className="max-w-2xl border-primary-foreground bg-input!"
-          />
-        </div>
-        <div>
-          <LexicalEditor onChange={(html) => setContent(html)} />
-        </div>
-        <div className="ml-auto mr-2">
-          <Button
-            size={"lg"}
-            onClick={addBlogHandler}
-            disabled={mutation.isPending}
-          >
-            {mutation.isPending ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              </>
-            ) : (
-              "Save"
-            )}
-          </Button>
-        </div>
-      </main>
+      <BlogForm
+        onSubmit={handleSubmit}
+        submitButtonText="Save"
+        isSubmitting={mutation.isPending}
+      />
     </div>
   );
 }
