@@ -17,4 +17,5 @@ export const auth = betterAuth({
     expiresIn: 60 * 60 * 12,
   },
   plugins: [reactStartCookies()],
+  secret: process.env.BETTER_AUTH_SECRET,
 });
