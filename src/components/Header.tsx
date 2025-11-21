@@ -1,7 +1,7 @@
 import { Link, useRouter } from "@tanstack/react-router";
 
 import { useEffect, useRef, useState } from "react";
-import { Construction, Home, Menu, X } from "lucide-react";
+import { Construction, Home, Menu, ShieldUser, X } from "lucide-react";
 import { Button } from "./ui/button";
 import { Session } from "@/lib/server-functions";
 import { createAuthClient } from "better-auth/react";
@@ -127,7 +127,7 @@ export default function Header({ session, isAdmin }: Props) {
             <Home size={20} />
             <span className="font-medium">Home</span>
           </Link>
-          <Link
+          {/* <Link
             to="/projects"
             onClick={() => setIsOpen(false)}
             className="flex items-center gap-3 p-3 rounded-lg hover:bg-sidebar-accent transition-colors mb-2 text-sidebar-foreground"
@@ -138,6 +138,18 @@ export default function Header({ session, isAdmin }: Props) {
           >
             <Construction size={20} />
             <span className="font-medium">Projects</span>
+          </Link> */}
+          <Link
+            to="/admin"
+            onClick={() => setIsOpen(false)}
+            className="flex items-center gap-3 p-3 rounded-lg hover:bg-sidebar-accent transition-colors mb-2 text-sidebar-foreground"
+            activeProps={{
+              className:
+                "flex items-center gap-3 p-3 rounded-lg bg-sidebar-primary text-sidebar-primary-foreground transition-colors mb-2",
+            }}
+          >
+            <ShieldUser size={20} />
+            <span className="font-medium">Admin</span>
           </Link>
         </nav>
       </aside>

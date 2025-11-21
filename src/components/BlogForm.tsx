@@ -11,7 +11,7 @@ type BlogFormProps = {
   submitButtonText?: string;
   isSubmitting?: boolean;
   isEdit?: boolean;
-  triggerDelete: () => void;
+  triggerDelete?: () => void;
 };
 
 export function BlogForm({
@@ -40,7 +40,9 @@ export function BlogForm({
   };
 
   const handleDelete = () => {
-    triggerDelete();
+    if (triggerDelete) {
+      triggerDelete();
+    }
   };
 
   return (

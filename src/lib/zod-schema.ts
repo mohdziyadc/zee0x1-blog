@@ -1,5 +1,16 @@
 import { z } from "zod";
 
+export enum BLOG_STATUS {
+  DRAFT = "DRAFT",
+  PUBLISHED = "PUBLISHED",
+}
+
+export enum TIME_SORT {
+  CREATED_AT = "CREATED_AT",
+  UPDATED_AT = "UPDATED_AT",
+  PUBLISHED_AT = "PUBLISHED_AT",
+}
+
 export const BlogsSchema = z.object({
   slug: z.string().nonempty(),
   title: z.string().min(1),
@@ -21,6 +32,7 @@ export const UpdateBlogSchema = z.object({
 
 export const FetchBlogDto = z.object({
   blogStatus: z.string().optional().default("DRAFT"),
+  orderBy: z.nativeEnum(TIME_SORT).optional().default(TIME_SORT.CREATED_AT),
 });
 
 export const FetchBlogBySlugDto = z.object({
@@ -29,4 +41,9 @@ export const FetchBlogBySlugDto = z.object({
 
 export const DeleteBlogDto = z.object({
   id: z.number(),
+});
+
+export const UpdateBlogStatusDto = z.object({
+  id: z.number(),
+  status: z.enum([BLOG_STATUS.DRAFT, BLOG_STATUS.PUBLISHED]),
 });

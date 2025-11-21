@@ -1,3 +1,4 @@
+import { useMutation } from "@tanstack/react-query";
 import { Button } from "./ui/button";
 import {
   Dialog,
@@ -7,23 +8,68 @@ import {
   DialogHeader,
   DialogTitle,
 } from "./ui/dialog";
-import { FetchBlog } from "@/lib/server-functions";
-import { useNavigate } from "@tanstack/react-router";
+import { FetchBlog, toggleBlogStatus } from "@/lib/server-functions";
+import { useNavigate, useRouter } from "@tanstack/react-router";
+import { z } from "zod";
+import { BLOG_STATUS, UpdateBlogStatusDto } from "@/lib/zod-schema";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
+import clsx from "clsx";
 
 type Props = {
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
   blog: FetchBlog | undefined;
+  isPublished?: boolean;
 };
 
-export const EditDialog = ({ isOpen, setIsOpen, blog }: Props) => {
+type UpdateBlogStatusType = z.infer<typeof UpdateBlogStatusDto>;
+
+export const EditDialog = ({
+  isOpen,
+  setIsOpen,
+  blog,
+  isPublished = false,
+}: Props) => {
   const navigate = useNavigate();
+  const router = useRouter();
+  const publishButtonText = isPublished ? "Unpublish" : "Publish";
+
+  const toggleStatusMutation = useMutation({
+    mutationFn: async (data: UpdateBlogStatusType) => {
+      await toggleBlogStatus({
+        data: {
+          ...data,
+        },
+      });
+    },
+    onSuccess: () => {
+      toast.success(
+        `Blog post ${isPublished ? "unpublished" : "published"} successfully!`
+      );
+      setIsOpen(!isOpen);
+      router.invalidate();
+    },
+    onError: (error) => {
+      toast.error(
+        `Failed to ${isPublished ? "unpublish" : "publish"} blog post. Please try again.`
+      );
+      console.error("Error updating blog post:", error);
+    },
+  });
 
   if (!blog) return null;
 
   const handleEditClick = () => {
     setIsOpen(false);
     navigate({ to: `/admin/edit/${blog.slug}` });
+  };
+
+  const handleStatusChange = () => {
+    toggleStatusMutation.mutate({
+      id: blog.id,
+      status: isPublished ? BLOG_STATUS.DRAFT : BLOG_STATUS.PUBLISHED,
+    });
   };
 
   return (
@@ -41,11 +87,30 @@ export const EditDialog = ({ isOpen, setIsOpen, blog }: Props) => {
               />
             )}
           </div>
-          <DialogFooter>
-            <DialogClose asChild>
-              <Button variant={"outline"}>Cancel</Button>
-            </DialogClose>
-            <Button onClick={handleEditClick}>Edit Blog</Button>
+          <DialogFooter className="flex-row! justify-between! items-center">
+            <div>
+              <Button
+                onClick={handleStatusChange}
+                className={clsx(
+                  "flex justify-center items-center",
+                  isPublished
+                    ? "bg-red-500 hover:bg-red-600"
+                    : "bg-green-500 hover:bg-green-700"
+                )}
+              >
+                {toggleStatusMutation.isPending ? (
+                  <Loader2 className="h-6 w-6 animate-spin" />
+                ) : (
+                  <span>{publishButtonText}</span>
+                )}
+              </Button>
+            </div>
+            <div className="flex gap-2">
+              <DialogClose asChild>
+                <Button variant={"outline"}>Cancel</Button>
+              </DialogClose>
+              <Button onClick={handleEditClick}>Edit Blog</Button>
+            </div>
           </DialogFooter>
         </DialogContent>
       </Dialog>

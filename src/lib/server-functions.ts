@@ -1,4 +1,4 @@
-import { createServerFn } from "@tanstack/react-start";
+import { createServerFn, createMiddleware } from "@tanstack/react-start";
 import { getRequestHeaders } from "@tanstack/react-start/server";
 import { auth } from "./auth";
 import { db } from "@/db";
@@ -10,7 +10,40 @@ import {
   UpdateBlogSchema,
   FetchBlogBySlugDto,
   DeleteBlogDto,
+  UpdateBlogStatusDto,
+  TIME_SORT,
+  BLOG_STATUS,
 } from "./zod-schema";
+
+// Admin middleware to check if user has admin privileges
+export const adminMiddleware = createMiddleware().server(async ({ next }) => {
+  try {
+    const reqHeaders = getRequestHeaders();
+    const session = await auth.api.getSession({
+      headers: reqHeaders,
+    });
+
+    if (!session?.user.email) {
+      throw new Error("Unauthorized: No active session");
+    }
+
+    const result = await db
+      .select({
+        isAdmin: user.isAdmin,
+      })
+      .from(user)
+      .where(eq(user.email, session.user.email));
+
+    if (!result[0] || !result[0].isAdmin) {
+      throw new Error("Forbidden: Admin access required");
+    }
+
+    return await next();
+  } catch (error) {
+    console.error("Error checking admin status:", error);
+    throw error;
+  }
+});
 
 export const getSessionAndAdminFromServer = createServerFn({
   method: "GET",
@@ -44,6 +77,7 @@ export const getSessionAndAdminFromServer = createServerFn({
 
 export const createDraftBlogPost = createServerFn({ method: "POST" })
   .inputValidator(BlogsSchema)
+  .middleware([adminMiddleware])
   .handler(async ({ data }) => {
     try {
       await db.insert(blogs).values({
@@ -64,6 +98,14 @@ export const fetchBlogs = createServerFn({ method: "GET" })
   .inputValidator(FetchBlogDto)
   .handler(async ({ data }) => {
     try {
+      const orderByMap = {
+        [TIME_SORT.CREATED_AT]: blogs.createdAt,
+        [TIME_SORT.PUBLISHED_AT]: blogs.publishedAt,
+        [TIME_SORT.UPDATED_AT]: blogs.updatedAt,
+      };
+
+      const orderByKey = orderByMap[data.orderBy];
+
       const blogPosts = await db
         .select({
           authorName: user.name,
@@ -73,7 +115,7 @@ export const fetchBlogs = createServerFn({ method: "GET" })
         .from(blogs)
         .leftJoin(user, eq(user.id, blogs.author_id))
         .where(eq(blogs.status, data.blogStatus))
-        .orderBy(desc(blogs.createdAt));
+        .orderBy(desc(orderByKey));
       return blogPosts;
     } catch (error) {
       console.error("Error fetching blogs:", error);
@@ -109,6 +151,7 @@ export const fetchBlogBySlug = createServerFn({ method: "GET" })
 
 export const updateBlogPost = createServerFn({ method: "POST" })
   .inputValidator(UpdateBlogSchema)
+  .middleware([adminMiddleware])
   .handler(async ({ data }) => {
     try {
       await db
@@ -129,12 +172,32 @@ export const updateBlogPost = createServerFn({ method: "POST" })
 
 export const deleteBlogPost = createServerFn({ method: "POST" })
   .inputValidator(DeleteBlogDto)
+  .middleware([adminMiddleware])
   .handler(async ({ data }) => {
     try {
       await db.delete(blogs).where(eq(blogs.id, data.id));
     } catch (error) {
       console.error("Error deleting blog post:", error);
       throw new Error("Failed to delete blog post");
+    }
+  });
+
+export const toggleBlogStatus = createServerFn({ method: "POST" })
+  .inputValidator(UpdateBlogStatusDto)
+  .middleware([adminMiddleware])
+  .handler(async ({ data }) => {
+    try {
+      await db
+        .update(blogs)
+        .set({
+          status: data.status,
+          publishedAt:
+            data.status === BLOG_STATUS.PUBLISHED ? new Date() : null,
+        })
+        .where(eq(blogs.id, data.id));
+    } catch (error) {
+      console.error("Error in updating blog status: ", error);
+      throw new Error("Failed to update blog status");
     }
   });
 

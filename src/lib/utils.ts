@@ -5,7 +5,7 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function generateExcerpt(html: string, maxLength = 150): string {
+export function generateExcerpt(html: string, maxLength = 250): string {
   const tempDiv = document.createElement("div");
   // Add spaces between adjacent HTML tags to prevent text concatenation
   const htmlWithSpaces = html.replace(/></g, "> <");
