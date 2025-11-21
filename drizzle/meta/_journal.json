@@ -5,43 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1762602504097,
-      "tag": "0000_unique_prowler",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1762603355751,
-      "tag": "0001_stormy_madelyne_pryor",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1762696202964,
-      "tag": "0002_pink_bill_hollister",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1762713995716,
-      "tag": "0003_goofy_victor_mancha",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1763200664901,
-      "tag": "0004_mature_polaris",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "7",
-      "when": 1763659225134,
-      "tag": "0005_left_dormammu",
+      "when": 1763739221462,
+      "tag": "0000_same_shinko_yamashiro",
       "breakpoints": true
     }
   ]
