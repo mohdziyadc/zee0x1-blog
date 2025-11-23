@@ -1,14 +1,14 @@
 import {
   HeadContent,
+  Link,
   Outlet,
   Scripts,
   createRootRouteWithContext,
 } from "@tanstack/react-router";
-import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
-import { TanStackDevtools } from "@tanstack/react-devtools";
 
 import Header from "../components/Header";
 import { Toaster } from "@/components/ui/sonner";
+import { Button } from "@/components/ui/button";
 
 import appCss from "../styles.css?url";
 
@@ -71,6 +71,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
     return { session, isAdmin };
   },
   component: RootDocument,
+  notFoundComponent: NotFound,
 });
 
 function RootDocument() {
@@ -99,5 +100,22 @@ function RootDocument() {
         <Scripts />
       </body>
     </html>
+  );
+}
+
+function NotFound() {
+  return (
+    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-4.5rem)] px-4">
+      <div className="text-center space-y-6 max-w-md">
+        <h1 className="text-6xl md:text-8xl font-bold text-primary">404</h1>
+        <h2 className="text-2xl md:text-3xl font-semibold">Page Not Found</h2>
+        <p className="text-muted-foreground text-sm md:text-base">
+          Sorry, the page you're looking for doesn't exist or has been moved.
+        </p>
+        <Button asChild size="lg" className="mt-4">
+          <Link to="/">Go Back Home</Link>
+        </Button>
+      </div>
+    </div>
   );
 }
