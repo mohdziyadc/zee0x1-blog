@@ -99,8 +99,11 @@ code {
   * {
     @apply border-border outline-ring/50;
   }
+  html {
+    @apply bg-background;
+  }
   body {
-    @apply text-foreground;
+    @apply text-foreground bg-background;
     background: linear-gradient(
       135deg,
       oklch(0.12 0.02 240) 0%,

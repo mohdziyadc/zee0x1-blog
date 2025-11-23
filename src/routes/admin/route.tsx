@@ -84,19 +84,39 @@ function AdminLayout() {
   }
 
   return (
-    <div className="flex min-h-[calc(100vh-4.5rem)]">
-      <aside className="w-64 border-r p-4">
-        <h2 className="text-xl font-bold">
-          <Link to="/admin">Admin Panel</Link>
-        </h2>
-        <nav className="my-4">
-          <Link to="/admin/view">View & Publish</Link>
-        </nav>
-        <nav className="my-4">
-          <Link to="/admin/create">Create</Link>
-        </nav>
+    <div className="flex flex-col lg:flex-row min-h-[calc(100vh-4.5rem)]">
+      <aside className="lg:w-64 border-b lg:border-b-0 lg:border-r bg-background">
+        <div className="p-4 lg:sticky lg:top-18">
+          <nav className="flex lg:flex-col gap-2 overflow-x-auto lg:overflow-x-visible">
+            <h2 className=" px-4 py-2 text-xl font-bold lg:block">
+              <Link to="/admin">Admin Panel</Link>
+            </h2>
+            <Link
+              to="/admin/view"
+              className="px-4 py-2 rounded-md hover:bg-accent transition-colors whitespace-nowrap shrink-0 lg:shrink"
+              activeProps={{
+                className:
+                  "px-4 py-2 rounded-md bg-accent transition-colors whitespace-nowrap shrink-0 lg:shrink",
+              }}
+            >
+              View & Publish
+            </Link>
+            <Link
+              to="/admin/create"
+              className="px-4 py-2 rounded-md hover:bg-accent transition-colors whitespace-nowrap shrink-0 lg:shrink"
+              activeProps={{
+                className:
+                  "px-4 py-2 rounded-md bg-accent transition-colors whitespace-nowrap shrink-0 lg:shrink",
+              }}
+            >
+              Create
+            </Link>
+          </nav>
+        </div>
       </aside>
-      <main className="flex-1 p-4 overflow-hidden">
+
+      {/* Main Content */}
+      <main className="flex-1 p-4 lg:p-6 overflow-auto">
         <Outlet />
       </main>
     </div>
