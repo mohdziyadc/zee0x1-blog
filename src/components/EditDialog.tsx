@@ -9,7 +9,7 @@ import {
   DialogTitle,
 } from "./ui/dialog";
 import { FetchBlog, toggleBlogStatus } from "@/lib/server-functions";
-import { useNavigate, useRouter } from "@tanstack/react-router";
+import { Link, useNavigate, useRouter } from "@tanstack/react-router";
 import { z } from "zod";
 import { BLOG_STATUS, UpdateBlogStatusDto } from "@/lib/zod-schema";
 import { toast } from "sonner";
@@ -83,12 +83,12 @@ export const EditDialog = ({
             {blog.content && (
               <div
                 className="text-base leading-relaxed"
-                dangerouslySetInnerHTML={{ __html: blog.content }}
+                dangerouslySetInnerHTML={{ __html: blog.content.slice(0, 500) }}
               />
             )}
           </div>
           <DialogFooter className="flex-row! justify-between! items-center">
-            <div>
+            <div className="flex flex-row gap-4">
               <Button
                 onClick={handleStatusChange}
                 className={clsx(
@@ -103,6 +103,14 @@ export const EditDialog = ({
                 ) : (
                   <span>{publishButtonText}</span>
                 )}
+              </Button>
+              <Button
+                variant={"secondary"}
+                onClick={() => {
+                  navigate({ to: `/admin/preview/${blog.slug}` });
+                }}
+              >
+                Preview
               </Button>
             </div>
             <div className="flex gap-2">
